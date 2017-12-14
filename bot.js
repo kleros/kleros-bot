@@ -1,12 +1,16 @@
-import Daemonize from 'daemonize2'
+const Daemonize = require('daemonize2')
+const dotenv =  require('dotenv')
+
+// use enviornment variables in .env
+dotenv.config()
 
 const processes = []
 
 // process for period changes
-const NewPeriodHandler = Daemonize.setup(
+const NewPeriodHandler = Daemonize.setup({
   main: "./lib/newPeriodHandler.js",
   name: "newPeriodHandler",
-)
+})
 processes.push(NewPeriodHandler)
 
 switch (process.argv[2]) {
