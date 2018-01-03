@@ -20,8 +20,3 @@ That's it!
 ```
 yarn start
 ```
-
-#### stop processes
-```
-yarn stop
-```
