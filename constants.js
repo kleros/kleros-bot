@@ -7,7 +7,10 @@ exports.PERIODS = {
   APPEAL: 3,
   EXECUTE: 4
 }
-exports.DISPUTE_OPEN = 0
-exports.DISPUTE_RESOLVING = 1
-exports.DISPUTE_EXECUTABLE = 2
+exports.DISPUTE_STATES = {
+  OPEN: 0,
+  RESOLVING: 1,
+  EXECUTABLE: 2
+}
 exports.GAS_LIMIT = 440000
+exports.NULL_ADDRESS = '0x'
