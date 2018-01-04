@@ -14,7 +14,8 @@ import { actOnOpenDisputes } from './lib/actOnOpenDisputes'
 let transactionController
 let botAddress
 
-let PERIOD_INTERVALS = []
+// FIXME once more stable don't hard code
+let PERIOD_INTERVALS = [300, 0, 300, 300, 300]
 let CURRENT_PERIOD
 
 let cycle_stop = false
@@ -29,10 +30,11 @@ const init = async () => {
   const web3 = new Web3(web3Provider)
   KlerosPOC = await KlerosInstance.klerosPOC
 
-  for (let i=0;i<5;i++) {
-    const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
-    PERIOD_INTERVALS.push(time)
-  }
+  // FIXME acting unstable for now so we will hardcode this
+  // for (let i=0;i<5;i++) {
+  //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
+  //   PERIOD_INTERVALS.push(time)
+  // }
   CURRENT_PERIOD = await KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
   transactionController = new TransactionController(process.env.PRIVATE_KEY)
@@ -42,17 +44,17 @@ const init = async () => {
 }
 
 const passPeriodCycle = async () => {
+  // check if it is time to repartition/execute
+  if (CURRENT_PERIOD === PERIODS.EXECUTE) {
+    await actOnOpenDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, transactionController)
+  }
+
   timer = setTimeout(async () => {
     const txHash = await transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
     // block until tx has been mined. this works for timing as well as for executing/repartitioning
     await transactionListener(txHash)
 
     CURRENT_PERIOD = await KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
-
-    // check if it is time to repartition/execute
-    if (CURRENT_PERIOD === PERIODS.EXECUTE) {
-      await actOnOpenDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, transactionController)
-    }
 
     // start another cycle
     if (!cycle_stop) passPeriodCycle()
