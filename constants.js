@@ -1,5 +1,3 @@
-exports.ETH_PROVIDER = 'https://kovan.infura.io/cfNRuFKJMNeWhBsn2U4U'
-exports.ARBITRATOR_CONTRACT_ADDRESS = '0xaea35f89f98996ae06aac344ab4b9ce1731059c4'
 exports.PERIODS = {
   ACTIVATION: 0,
   DRAW: 1,
