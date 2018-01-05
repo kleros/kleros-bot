@@ -2,10 +2,9 @@ import Web3 from 'web3'
 import Tx from 'ethereumjs-tx'
 import { privateToAddress } from 'ethereumjs-util'
 import Web3Abi from 'web3-eth-abi'
-import { Kleros } from 'kleros-api'
 import {
   GAS_LIMIT
-} from '../constants'
+} from '../../constants'
 
 class TransactionController {
   /**
@@ -21,9 +20,6 @@ class TransactionController {
     // web3
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     this.web3 = new Web3(web3Provider)
-    // kleros
-    const KlerosInstance = new Kleros(web3Provider)
-    this.KlerosPOC = KlerosInstance.klerosPOC
   }
 
   _createSignedRawTransaction(paramObject) {
@@ -44,7 +40,7 @@ class TransactionController {
   }
 
   _getNonce () {
-    return this.web3.eth.getTransactionCount('0x' + this.address)
+    return this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
   }
 
   _getTxParams (

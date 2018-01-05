@@ -8,7 +8,8 @@ exports.PERIODS = {
 exports.DISPUTE_STATES = {
   OPEN: 0,
   RESOLVING: 1,
-  EXECUTABLE: 2
+  EXECUTABLE: 2,
+  EXECUTED: 3
 }
 exports.GAS_LIMIT = 440000
 exports.NULL_ADDRESS = '0x'
