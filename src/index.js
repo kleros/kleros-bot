@@ -1,4 +1,4 @@
-import KlerosPOCBot from './bots/KlerosPOCBot'
+import KlerosPOCBot from './bots/KlerosPOC'
 import dotenv from 'dotenv'
 // use enviornment variables in .env. Do this before anything else
 dotenv.config()
@@ -25,7 +25,8 @@ process.on('unhandledRejection', (reason, p) => {
 
 switch (botType) {
   case 'KlerosPOC':
-    Bot = new KlerosPOCBot()
+    const arbitratorAddress = process.env.ARBITRATOR_CONTRACT_ADDRESS
+    Bot = new KlerosPOCBot(arbitratorAddress)
     break
   default:
     throw new Error("Unrecognized bot-type: " + botType)

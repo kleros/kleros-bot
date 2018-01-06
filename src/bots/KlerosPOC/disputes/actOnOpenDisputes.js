@@ -3,8 +3,8 @@ import { Kleros } from 'kleros-api'
 import {
   DISPUTE_STATES,
   NULL_ADDRESS
-} from '../../constants'
-import { transactionListener } from '../transactions/transactionListener'
+} from '../../../../constants'
+import { transactionListener } from '../../../helpers'
 import childProcess from 'child_process'
 
 /** FIXME memoize disputeId's that have been acted on so that we can more efficiently rip through the array
@@ -22,7 +22,6 @@ export const processDisputes = async (
 
   let disputeId = 0
   let txHash
-
   while (1) {
     // iterate over all disputes (FIXME inefficient)
     try {
@@ -30,9 +29,13 @@ export const processDisputes = async (
        // we have seen all open disputes
        if (dispute.arbitratedContract === NULL_ADDRESS) break
        // skip disputes that have been executed
-       if (dispute.state === DISPUTE_STATES.EXECUTED) continue
+       if (dispute.state === DISPUTE_STATES.EXECUTED) {
+         disputeId++
+         continue
+       }
        // Start new process to handle tx's for dispute
        // childProcess.fork('./disputeActionsWorker', [dispute, disputeId, arbitratorAddress, ession, TxController])
+       // console.log('continuing...')
        await actOnDispute(dispute, disputeId, arbitratorAddress, ession, TxController)
        disputeId++
      } catch (e) {

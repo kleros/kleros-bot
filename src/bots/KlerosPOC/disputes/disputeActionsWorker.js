@@ -1,7 +1,7 @@
 import {
   DISPUTE_STATES
-} from '../../constants'
-import { actOnDispute } from '../transactions/actOnOpenDisputes'
+} from '../../../../constants'
+import { actOnDispute } from './actOnOpenDisputes'
 
 const main = async (dispute, disputeId, arbitratorAddress, session, TxController) => {
   console.log("starting new worker for dispute " + disputeId)
