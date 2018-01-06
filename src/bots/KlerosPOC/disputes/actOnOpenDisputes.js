@@ -12,12 +12,9 @@ import childProcess from 'child_process'
 */
 export const processDisputes = async (
   arbitratorAddress,
-  TxController
+  TxController,
+  KlerosPOC
 ) => {
-  const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
-  const KlerosInstance = new Kleros(web3Provider)
-  const KlerosPOC = await KlerosInstance.klerosPOC
-
   const session = await KlerosPOC.getSession(arbitratorAddress)
 
   let disputeId = 0

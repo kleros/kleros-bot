@@ -18,32 +18,38 @@ class KlerosPOCBot {
     this.timer
     // kleros params
     this.transactionController
-    this.KlerosPOC
     this.currentPeriod
     this.botAddress
     this.periodIntervals
-  }
-
-  _init = async () => {
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     // don't care about store
     const KlerosInstance = new Kleros(web3Provider)
     const web3 = new Web3(web3Provider)
-    this.KlerosPOC = await KlerosInstance.klerosPOC
+    this.KlerosPOC = KlerosInstance.klerosPOC
+  }
 
-    // FIXME acting unstable for now so we will hardcode this
-    // for (let i=0;i<5;i++) {
-    //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
-    //   this.periodIntervals.push(time)
-    // }
-    // this.periodIntervals = [300,0,300,300,300]
-    this.periodIntervals = [1,0,1,1,1]
-    this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+  _init = async () => {
+    try {
+      // FIXME acting unstable for now so we will hardcode this
+      // for (let i=0;i<5;i++) {
+      //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
+      //   this.periodIntervals.push(time)
+      // }
+      // this.periodIntervals = [300,0,300,300,300]
+      this.periodIntervals = [1,0,1,1,1]
+      this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
-    this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
-    this.botAddress = this.transactionController.address
-    console.log("bot address: " + this.botAddress)
-    process.env.ADDRESS = this.botAddress
+      this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
+      this.botAddress = this.transactionController.address
+      console.log("bot address: " + this.botAddress)
+      process.env.ADDRESS = this.botAddress
+    } catch (e) {
+      // infinite loop?
+      console.log(1)
+      throw new Error(e)
+      // await this._init()
+    }
+
   }
 
   /** Entry Point
@@ -64,15 +70,26 @@ class KlerosPOCBot {
     // check if it is time to repartition/execute
     if (this.currentPeriod === PERIODS.EXECUTE) {
       // this starts child processes to handle dispute actions
-      await processDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, this.transactionController)
+      await processDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, this.transactionController, this.KlerosPOC)
     }
 
     this.timer = setTimeout(async () => {
-      const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+      try {
+        const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+      } catch (e) {
+        console.log(3)
+        throw new Error(e)
+      }
+
       // block until tx has been mined. this works for timing as well as for executing/repartitioning
       await transactionListener(txHash)
+      try {
+        this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+      } catch (e) {
+        console.log(2)
+        throw new Error(e)
+      }
 
-      this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
       // start another cycle
       if (!this.cycle_stop) this.passPeriodCycle()

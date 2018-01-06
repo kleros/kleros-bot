@@ -29,17 +29,15 @@ class TransactionController {
   }
 
   async _sendTransaction (rawTransaction) {
-    try {
-      const txHash = await this.web3.eth.sendRawTransaction('0x' + rawTransaction.toString('hex'))
+    const txHash = await this.web3.eth.sendRawTransaction('0x' + rawTransaction.toString('hex'))
 
-      return txHash
-    } catch (e) {
-      throw new Error(e)
-    }
+    return txHash
   }
 
   _getNonce () {
-    return this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
+    const nonce = this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
+    console.log(nonce)
+    return nonce
   }
 
   _getTxParams (
@@ -60,6 +58,23 @@ class TransactionController {
       from: from,
       to: to
     }
+  }
+
+  _sendTransactionWithBackoff = async (to, from, data) => {
+    let txHash
+
+    let txParams = this._getTxParams(to, from, data)
+    let tx = this._createSignedRawTransaction(txParams)
+    try {
+      txHash = await this._sendTransaction(tx)
+    } catch (e) {
+      // retry once. Usually a nonce issue TODO make this better
+      txParams = this._getTxParams(to, from, data)
+      tx = this._createSignedRawTransaction(txParams)
+      txHash = await this._sendTransaction(tx)
+    }
+
+    return txHash
   }
 }
 

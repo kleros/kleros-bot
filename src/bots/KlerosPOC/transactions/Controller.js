@@ -15,16 +15,7 @@ class KlerosPOCTxController extends TransactionController {
       inputs: []
     })
 
-    const txParams = await this._getTxParams(
-      arbitratorAddress,
-      this.address,
-      bytecodeData
-    )
-
-    const tx = await this._createSignedRawTransaction(txParams)
-
-    const txHash = await this._sendTransaction(tx)
-
+    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
     console.log("passPeriod: " + txHash)
     return txHash
   }
@@ -39,16 +30,7 @@ class KlerosPOCTxController extends TransactionController {
       }]
     }, [disputeId])
 
-    const txParams = this._getTxParams(
-      arbitratorAddress,
-      this.address,
-      bytecodeData
-    )
-
-    const tx = this._createSignedRawTransaction(txParams)
-
-    const txHash = await this._sendTransaction(tx)
-
+    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
     console.log("repartitionJurorTokens: " + txHash)
     return txHash
   }
@@ -63,16 +45,7 @@ class KlerosPOCTxController extends TransactionController {
       }]
     }, [disputeId])
 
-    const txParams = this._getTxParams(
-      arbitratorAddress,
-      this.address,
-      bytecodeData
-    )
-
-    const tx = this._createSignedRawTransaction(txParams)
-
-    const txHash = await this._sendTransaction(tx)
-
+    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
     console.log("executeRuling: " + txHash)
     return txHash
   }
