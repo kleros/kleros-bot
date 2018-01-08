@@ -1,4 +1,4 @@
-Kleros Bot runs processes that track an instance of a kleros arbitrator and perform tasks such as advancing the period or executing contracts
+Kleros Bot contains bots that interact with Kleros contracts. Currently there is only one bot, called KlerosPOC
 
 ## setup
 Install dependencies
@@ -20,7 +20,17 @@ That's it!
 
 ## usage
 
-#### start processes
+#### start dev
 ```
-yarn start
+yarn dev <bot-type>
 ```
+
+#### start prod
+```
+yarn prod <bot-type>
+```
+
+#### bot-types
+| bot-type        | Use                                                  | Contract  |
+| --------------- |------------------------------------------------------| ------|
+| KlerosPOC       | Pass periods, repartition tokens and execute rulings | [Link](https://github.com/kleros/kleros/blob/master/contracts/KlerosPOC.sol) |

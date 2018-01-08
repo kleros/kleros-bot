@@ -1,5 +1,4 @@
 import Web3 from 'web3'
-import { Kleros } from 'kleros-api'
 
 /** Crude method for seeing when tx's have been mined. INFURA does not support event watching
 * and as far as I can tell MetaMasks ZeroClientProvider only works client side FIXME

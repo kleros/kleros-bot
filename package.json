@@ -2,25 +2,40 @@
   "name": "kleros-bot",
   "version": "1.0.0",
   "description": "listen to kleros arbitrator contract and take actions",
-  "main": "bot.js",
+  "main": "src/index.js",
   "repository": "git@github.com:satello/kleros-bot.git",
   "author": "Sam Vitello <sam.j.vitello@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "babel-node bot.js --presets es2015,stage-2",
-    "stop": "node bot.js stop"
+    "dev": "babel-watch src/index.js",
+    "start": "npm run build && node build/kleros-bot.js",
+    "build": "webpack --env build",
+    "start-KlerosPOC": "npm run build && node build/kleros-bot.js --bot_type=KlerosPOC"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1"
+    "babel-core": "6.24.1",
+    "babel-jest": "^20.0.3",
+    "babel-loader": "7.0.0",
+    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "jest-cli": "^20.0.4",
+    "regenerator-runtime": "^0.11.0",
+    "webpack": "3.1.0",
+    "webpack-dotenv-plugin": "^2.0.2"
   },
   "dependencies": {
-    "daemon": "^1.1.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-watch": "^2.0.7",
     "dotenv": "^4.0.0",
     "ethereumjs-tx": "^1.3.3",
     "ethereumjs-util": "^5.1.2",
-    "kleros-api": "^0.0.48",
+    "kleros-api": "^0.0.49",
+    "lodash": "^4.17.4",
+    "minimist": "^1.2.0",
     "web3": "^0.19.0",
     "web3-eth-abi": "^1.0.0-beta.27"
   }
