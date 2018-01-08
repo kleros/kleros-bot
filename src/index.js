@@ -7,7 +7,7 @@ let Bot
 
 if (process.argv.length < 3) {
   console.log('Missing parameter bot-type')
-  console.log('Usage: node bot.js <bot-type>')
+  console.log('Usage: node ./index.js <bot-type>')
   console.log('bot-types can be one of: KlerosPOC')
   process.exit()
 }

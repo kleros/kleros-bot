@@ -4,7 +4,6 @@ import {
   DISPUTE_STATES,
   NULL_ADDRESS
 } from '../../../../constants'
-import { transactionListener } from '../../../helpers'
 import childProcess from 'child_process'
 
 /** FIXME memoize disputeId's that have been acted on so that we can more efficiently rip through the array
@@ -30,9 +29,6 @@ export const processDisputes = async (
          disputeId++
          continue
        }
-       // Start new process to handle tx's for dispute
-       // childProcess.fork('./disputeActionsWorker', [dispute, disputeId, arbitratorAddress, ession, TxController])
-       // console.log('continuing...')
        await actOnDispute(dispute, disputeId, arbitratorAddress, ession, TxController)
        disputeId++
      } catch (e) {
@@ -50,12 +46,10 @@ export const actOnDispute = async (
 ) => {
   // FIXME use action indicators
   if (dispute.state === DISPUTE_STATES.OPEN && (dispute.firstSession + dispute.numberOfAppeals) <= session) {
+    // No need to wait on tx to be mined. Nonce should keep them in order
     txHash = await TxController.repartitionJurorTokens(arbitratorAddress, disputeId)
-    await transactionListener(txHash, 5)
     txHash = await TxController.executeRuling(arbitratorAddress, disputeId)
-    await transactionListener(txHash, 5)
   } else if (dispute.state === DISPUTE_STATES.EXECUTABLE) {
     txHash = await TxController.executeRuling(arbitratorAddress, disputeId)
-    await transactionListener(txHash, 5)
   }
 }

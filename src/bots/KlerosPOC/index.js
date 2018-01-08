@@ -29,27 +29,18 @@ class KlerosPOCBot {
   }
 
   _init = async () => {
-    try {
-      // FIXME acting unstable for now so we will hardcode this
-      // for (let i=0;i<5;i++) {
-      //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
-      //   this.periodIntervals.push(time)
-      // }
-      // this.periodIntervals = [300,0,300,300,300]
-      this.periodIntervals = [1,0,1,1,1]
-      this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+    // FIXME acting unstable for now so we will hardcode this
+    // for (let i=0;i<5;i++) {
+    //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
+    //   this.periodIntervals.push(time)
+    // }
+    this.periodIntervals = [300,0,300,300,300]
+    this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
-      this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
-      this.botAddress = this.transactionController.address
-      console.log("bot address: " + this.botAddress)
-      process.env.ADDRESS = this.botAddress
-    } catch (e) {
-      // infinite loop?
-      console.log(1)
-      throw new Error(e)
-      // await this._init()
-    }
-
+    this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
+    this.botAddress = this.transactionController.address
+    console.log("bot address: " + this.botAddress)
+    process.env.ADDRESS = this.botAddress
   }
 
   /** Entry Point
@@ -74,22 +65,11 @@ class KlerosPOCBot {
     }
 
     this.timer = setTimeout(async () => {
-      try {
-        const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
-      } catch (e) {
-        console.log(3)
-        throw new Error(e)
-      }
+      const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
       // block until tx has been mined. this works for timing as well as for executing/repartitioning
       await transactionListener(txHash)
-      try {
-        this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
-      } catch (e) {
-        console.log(2)
-        throw new Error(e)
-      }
-
+      this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
       // start another cycle
       if (!this.cycle_stop) this.passPeriodCycle()

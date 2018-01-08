@@ -8,8 +8,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "babel-watch src/index.js",
-    "prod": "npm run build && node build/kleros-bot.js",
-    "build": "webpack --env build"
+    "start": "npm run build && node build/kleros-bot.js",
+    "build": "webpack --env build",
+    "start-KlerosPOC": "npm run build && node build/kleros-bot.js KlerosPOC"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

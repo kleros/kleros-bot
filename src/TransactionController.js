@@ -19,6 +19,8 @@ class TransactionController {
     // web3
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     this.web3 = new Web3(web3Provider)
+    // local nonce counter
+    this.nonce
   }
 
   _createSignedRawTransaction(paramObject) {
@@ -34,10 +36,18 @@ class TransactionController {
     return txHash
   }
 
+  /** Get nonce from blockchain if we don't have a counter in memory
+  * NOTE we are assuming that each bot will be using a different pub key so nonce will not be effected by external tx's
+  */
   _getNonce () {
-    const nonce = this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
-    console.log(nonce)
-    return nonce
+    if (!this.nonce) {
+      // if nonce isn's set get from blockchain
+      return this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
+    }
+    const currentNonce = this.nonce
+    this.nonce++
+
+    return currentNonce
   }
 
   _getTxParams (
