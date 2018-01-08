@@ -10,7 +10,7 @@
     "dev": "babel-watch src/index.js",
     "start": "npm run build && node build/kleros-bot.js",
     "build": "webpack --env build",
-    "start-KlerosPOC": "npm run build && node build/kleros-bot.js KlerosPOC"
+    "start-KlerosPOC": "npm run build && node build/kleros-bot.js --bot_type=KlerosPOC"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -25,8 +25,7 @@
     "jest-cli": "^20.0.4",
     "regenerator-runtime": "^0.11.0",
     "webpack": "3.1.0",
-    "webpack-dotenv-plugin": "^2.0.2",
-    "yargs": "7.1.0"
+    "webpack-dotenv-plugin": "^2.0.2"
   },
   "dependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
@@ -36,6 +35,7 @@
     "ethereumjs-util": "^5.1.2",
     "kleros-api": "^0.0.48",
     "lodash": "^4.17.4",
+    "minimist": "^1.2.0",
     "web3": "^0.19.0",
     "web3-eth-abi": "^1.0.0-beta.27"
   }

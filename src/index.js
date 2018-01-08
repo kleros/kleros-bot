@@ -1,17 +1,22 @@
 import KlerosPOCBot from './bots/KlerosPOC'
 import dotenv from 'dotenv'
+// to get it to play nice with webpack we need to import like this
+
 // use enviornment variables in .env. Do this before anything else
 dotenv.config()
 
 let Bot
+const args = require('minimist')(process.argv.slice(2))
+let botType = args.bot_type
 
-if (process.argv.length < 3) {
-  console.log('Missing parameter bot-type')
-  console.log('Usage: node ./index.js <bot-type>')
-  console.log('bot-types can be one of: KlerosPOC')
-  process.exit()
+if (!botType) {
+  console.log('Missing parameter bot_type')
+  console.log('Usage: node ./index.js --bot_type=<bot type>')
+  console.log('bot types can be one of: KlerosPOC')
+  // FIXME bable-watch isn't playing well with yargs
+  console.log('Defaulting to KlerosPOC')
+  botType = 'KlerosPOC'
 }
-const botType = process.argv[2]
 
 process.on('SIGTERM', function () {
     console.log('Got SIGTERM signal.')
@@ -20,7 +25,6 @@ process.on('SIGTERM', function () {
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-  // application specific logging, throwing an error, or other logic here
 });
 
 switch (botType) {
@@ -29,7 +33,7 @@ switch (botType) {
     Bot = new KlerosPOCBot(arbitratorAddress)
     break
   default:
-    throw new Error("Unrecognized bot-type: " + botType)
+    throw new Error("Unrecognized bot type: " + botType)
 }
 
 Bot.start()
