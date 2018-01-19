@@ -90,7 +90,8 @@ class TransactionController {
   _call = async (to, data, from=undefined) => {
     const result = await this.web3.eth.call({
       to: to,
-      data: data
+      data: data,
+      from: from
     })
 
     return result

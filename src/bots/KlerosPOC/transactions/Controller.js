@@ -10,7 +10,7 @@ class KlerosPOCTxController extends TransactionController {
   }
 
   async passPeriod (arbitratorAddress) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'passPeriod',
       type: 'function',
       inputs: []
@@ -26,7 +26,7 @@ class KlerosPOCTxController extends TransactionController {
   }
 
   async repartitionJurorTokens (arbitratorAddress, disputeId) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'oneShotTokenRepartition',
       type: 'function',
       inputs: [{
@@ -45,7 +45,7 @@ class KlerosPOCTxController extends TransactionController {
   }
 
   async executeRuling (arbitratorAddress, disputeId) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'executeRuling',
       type: 'function',
       inputs: [{
