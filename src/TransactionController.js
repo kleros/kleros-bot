@@ -23,14 +23,14 @@ class TransactionController {
     this.nonce
   }
 
-  _createSignedRawTransaction(paramObject) {
+  _createSignedRawTransaction = paramObject => {
     let tx = new Tx(paramObject)
     tx.sign(this._privateKey)
 
     return tx.serialize()
   }
 
-  async _sendTransaction (rawTransaction) {
+  _sendTransaction = async rawTransaction => {
     const txHash = await this.web3.eth.sendRawTransaction('0x' + rawTransaction.toString('hex'))
 
     return txHash
@@ -39,7 +39,7 @@ class TransactionController {
   /** Get nonce from blockchain if we don't have a counter in memory
   * NOTE we are assuming that each bot will be using a different pub key so nonce will not be effected by external tx's
   */
-  _getNonce () {
+  _getNonce = () => {
     if (!this.nonce) {
       // if nonce isn's set get from blockchain
       return this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
@@ -50,11 +50,11 @@ class TransactionController {
     return currentNonce
   }
 
-  _getTxParams (
+  _getTxParams = (
     to,
     from,
     data
-  ) {
+  ) => {
     const gasPrice = this.web3.eth.gasPrice
     const gasPriceHex = this.web3.toHex(gasPrice)
     const gasLimitHex = this.web3.toHex(GAS_LIMIT)
@@ -63,7 +63,7 @@ class TransactionController {
     return {
       nonce: nonce,
       gasPrice: gasPriceHex,
-      gasLimit: gasLimitHex,
+      gas: gasLimitHex,
       data: data,
       from: from,
       to: to
@@ -85,6 +85,16 @@ class TransactionController {
     }
 
     return txHash
+  }
+
+  _call = async (to, data, from=undefined) => {
+    const result = await this.web3.eth.call({
+      to: to,
+      data: data,
+      from: from
+    })
+
+    return result
   }
 }
 

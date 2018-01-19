@@ -1,4 +1,5 @@
 import TransactionController from '../../../TransactionController'
+import { isCallValid } from '../../../helpers'
 import Web3Abi from 'web3-eth-abi'
 
 /** Implements methods to call klerosPOC methods pass period, repartition tokens and execute ruling
@@ -9,19 +10,23 @@ class KlerosPOCTxController extends TransactionController {
   }
 
   async passPeriod (arbitratorAddress) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'passPeriod',
       type: 'function',
       inputs: []
     })
 
-    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
-    console.log("passPeriod: " + txHash)
-    return txHash
+    const isValid = await isCallValid(arbitratorAddress, bytecodeData)
+
+    if (isValid) {
+      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+      console.log("passPeriod: " + txHash)
+      return txHash
+    }
   }
 
   async repartitionJurorTokens (arbitratorAddress, disputeId) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'oneShotTokenRepartition',
       type: 'function',
       inputs: [{
@@ -30,13 +35,17 @@ class KlerosPOCTxController extends TransactionController {
       }]
     }, [disputeId])
 
-    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
-    console.log("repartitionJurorTokens: " + txHash)
-    return txHash
+    const isValid = await isCallValid(arbitratorAddress, bytecodeData)
+
+    if (isValid) {
+      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+      console.log("repartitionJurorTokens: " + txHash)
+      return txHash
+    }
   }
 
   async executeRuling (arbitratorAddress, disputeId) {
-    const bytecodeData = Web3Abi.encodeFunctionCall({
+    const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'executeRuling',
       type: 'function',
       inputs: [{
@@ -45,9 +54,13 @@ class KlerosPOCTxController extends TransactionController {
       }]
     }, [disputeId])
 
-    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
-    console.log("executeRuling: " + txHash)
-    return txHash
+    const isValid = await isCallValid(arbitratorAddress, bytecodeData)
+
+    if (isValid) {
+      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+      console.log("executeRuling: " + txHash)
+      return txHash
+    }
   }
 }
 
