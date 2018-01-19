@@ -63,17 +63,22 @@ class KlerosPOCBot {
       // this starts child processes to handle dispute actions
       await processDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, this.transactionController, this.KlerosPOC)
     }
+    // we can try to pass period right away since we have action indicators
+    this._passPeriod()
 
     this.timer = setTimeout(async () => {
-      const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
-
-      // block until tx has been mined. this works for timing as well as for executing/repartitioning
-      await transactionListener(txHash)
-      this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
-
+      this._passPeriod()
       // start another cycle
       if (!this.cycle_stop) this.passPeriodCycle()
     }, this.periodIntervals[this.currentPeriod] * 1000)
+  }
+
+  _passPeriod  = async () => {
+    const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+
+    // block until tx has been mined. this works for timing as well as for executing/repartitioning
+    await transactionListener(txHash)
+    this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
   }
 }
 
