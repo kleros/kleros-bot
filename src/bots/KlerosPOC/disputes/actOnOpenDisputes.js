@@ -47,9 +47,9 @@ export const actOnDispute = async (
   // FIXME use action indicators
   if (dispute.state === DISPUTE_STATES.OPEN && (dispute.firstSession + dispute.numberOfAppeals) <= session) {
     // No need to wait on tx to be mined. Nonce should keep them in order
-    txHash = await TxController.repartitionJurorTokens(arbitratorAddress, disputeId)
-    txHash = await TxController.executeRuling(arbitratorAddress, disputeId)
+    await TxController.repartitionJurorTokens(arbitratorAddress, disputeId)
+    await TxController.executeRuling(arbitratorAddress, disputeId)
   } else if (dispute.state === DISPUTE_STATES.EXECUTABLE) {
-    txHash = await TxController.executeRuling(arbitratorAddress, disputeId)
+    await TxController.executeRuling(arbitratorAddress, disputeId)
   }
 }
