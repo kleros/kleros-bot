@@ -29,7 +29,7 @@ export const processDisputes = async (
          disputeId++
          continue
        }
-       await actOnDispute(dispute, disputeId, arbitratorAddress, ession, TxController)
+       await actOnDispute(dispute, disputeId, arbitratorAddress, session, TxController)
        disputeId++
      } catch (e) {
        throw new Error(e)
