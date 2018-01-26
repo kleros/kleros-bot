@@ -8,8 +8,9 @@ import { CALL_VALIDATOR } from '../constants'
 export const transactionListener = async (txHash, secondsToWait=10) => {
   const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
   const web3 = new Web3(web3Provider)
-  // try again every 10 seconds
-  let txReceipt = await getTxReceipt(txHash, secondsToWait, web3)
+  // see if tx has been mined
+  let txReceipt = web3.eth.getTransactionReceipt(txHash)
+  // if not wait 10 seconds
   while (!txReceipt) {
     txReceipt = await getTxReceipt(txHash, secondsToWait, web3)
   }

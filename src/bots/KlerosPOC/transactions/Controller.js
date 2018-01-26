@@ -17,6 +17,7 @@ class KlerosPOCTxController extends TransactionController {
     })
 
     const isValid = await isCallValid(arbitratorAddress, bytecodeData)
+    console.log(isValid)
     if (isValid) {
       const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
       console.log("passPeriod: " + txHash)

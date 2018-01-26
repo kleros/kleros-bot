@@ -1,5 +1,4 @@
 import Web3 from 'web3'
-import { Kleros } from 'kleros-api'
 import {
   DISPUTE_STATES,
   NULL_ADDRESS

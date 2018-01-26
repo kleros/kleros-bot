@@ -20,7 +20,8 @@ class KlerosPOCBot {
     this.transactionController
     this.currentPeriod
     this.botAddress
-    this.periodIntervals
+    // default to 5 min per session
+    this.periodIntervals = [300,0,300,300,300]
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     // don't care about store
     const KlerosInstance = new Kleros(web3Provider)
@@ -29,18 +30,18 @@ class KlerosPOCBot {
   }
 
   _init = async () => {
-    // FIXME acting unstable for now so we will hardcode this
-    // for (let i=0;i<5;i++) {
-    //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
-    //   this.periodIntervals.push(time)
-    // }
-    this.periodIntervals = [300,0,300,300,300]
+    this.periodIntervals = []
+    for (let i=0;i<5;i++) {
+      const time = await this.KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
+      this.periodIntervals.push(time)
+    }
     this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
     this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
     this.botAddress = this.transactionController.address
     console.log("bot address: " + this.botAddress)
     process.env.ADDRESS = this.botAddress
+    this.cycleStop = false
   }
 
   /** Entry Point
@@ -73,12 +74,17 @@ class KlerosPOCBot {
   }
 
   _passPeriod  = async () => {
+    console.log("passing period...")
     const txHash = await this.transactionController.passPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
     if (txHash) {
       // block until tx has been mined. this works for timing as well as for executing/repartitioning
-      await transactionListener(txHash)
+      console.log("waiting...")
+      // await transactionListener(txHash)
+      console.log("done")
     }
+    console.log("changing period")
     this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
+    console.log(this.currentPeriod)
   }
 }
 

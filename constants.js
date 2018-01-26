@@ -13,3 +13,4 @@ exports.DISPUTE_STATES = {
 }
 exports.GAS_LIMIT = 440000
 exports.NULL_ADDRESS = '0x'
+exports.LOCALHOST_PROVIDER = 'http://localhost:8545'
