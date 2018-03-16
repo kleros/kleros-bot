@@ -30,11 +30,13 @@ class KlerosPOCBot {
 
   _init = async () => {
     // FIXME acting unstable for now so we will hardcode this
-    // for (let i=0;i<5;i++) {
-    //   const time = await KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
-    //   this.periodIntervals.push(time)
-    // }
-    this.periodIntervals = [300,0,300,300,300]
+    // this.periodIntervals = [300,0,300,300,300]
+    this.periodIntervals = []
+    for (let i=0;i<5;i++) {
+      const time = await this.KlerosPOC.getTimeForPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS, i)
+      this.periodIntervals.push(time)
+    }
+    console.log("TIME PER PERIOD: " + this.periodIntervals)
     this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
     this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
@@ -65,6 +67,7 @@ class KlerosPOCBot {
     }
     await this._passPeriod()
 
+    // FIXME use passPeriod event to trigger timer once events are supported
     this.timer = setTimeout(async () => {
       await this._passPeriod()
       // start another cycle

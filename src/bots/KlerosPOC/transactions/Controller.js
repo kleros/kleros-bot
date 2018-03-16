@@ -24,6 +24,7 @@ class KlerosPOCTxController extends TransactionController {
     }
   }
 
+  // FIXME use multi shot if it would fail
   async repartitionJurorTokens (arbitratorAddress, disputeId) {
     const bytecodeData = await Web3Abi.encodeFunctionCall({
       name: 'oneShotTokenRepartition',
@@ -38,7 +39,7 @@ class KlerosPOCTxController extends TransactionController {
 
     if (isValid) {
       const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
-      console.log("repartitionJurorTokens: " + txHash)
+      console.log(`repartitioning dispute ${disputeId}:  ${txHash}`)
       return txHash
     }
   }
@@ -53,13 +54,10 @@ class KlerosPOCTxController extends TransactionController {
       }]
     }, [disputeId])
 
-    const isValid = await isCallValid(arbitratorAddress, bytecodeData)
-
-    if (isValid) {
-      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
-      console.log("executeRuling: " + txHash)
-      return txHash
-    }
+    // FIXME: We don't want to check if call is valid because this is called directly after repartition so call will not be valid at time of submission
+    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+    console.log(`executing dispute ${disputeId}:  ${txHash}`)
+    return txHash
   }
 }
 
