@@ -41,8 +41,8 @@ class TransactionController {
   */
   _getNonce = () => {
     if (!this.nonce) {
-      // if nonce isn's set get from blockchain
-      return this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
+      // if nonce isn't set get from blockchain
+      this.nonce = this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
     }
     const currentNonce = this.nonce
     this.nonce++
