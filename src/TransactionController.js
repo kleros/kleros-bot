@@ -3,7 +3,7 @@ import Tx from 'ethereumjs-tx'
 import { privateToAddress } from 'ethereumjs-util'
 import {
   GAS_LIMIT
-} from '../constants'
+} from './constants/arbitrator'
 
 class TransactionController {
   /**

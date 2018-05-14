@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import { Kleros } from 'kleros-api'
 import {
   PERIODS
-} from '../../../constants'
+} from '../../constants/arbitrator'
 import TransactionController from './transactions/Controller'
 import { transactionListener } from '../../helpers'
 import { processDisputes } from './disputes/actOnOpenDisputes'
