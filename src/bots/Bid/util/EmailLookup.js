@@ -50,7 +50,7 @@ class EmailLookup {
     })
 
     return Promise.all(data.values.map(row => {
-      const ethAddress = row[20]
+      const ethAddress = (row[20] ? row[20].toLowerCase() : null)
       const emailAddress = row[4]
       this.addressMap[ethAddress] = emailAddress
     }))

@@ -111,7 +111,7 @@ class BidBot {
               const result = results[i]
 
               if (result.event === 'BidSubmitted') {
-                const contributor = result.args.contributor
+                const contributor = (result.args.contributor).toLowerCase()
                 const bidId = result.args.bidID.toNumber()
                 const time = result.args.time.toNumber()
 
