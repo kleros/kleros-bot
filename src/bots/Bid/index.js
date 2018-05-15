@@ -21,7 +21,7 @@ class BidBot {
     this.timer
     // web3
     this.web3Provider = ZeroClientProvider({
-      rpcUrl: "https://kovan.infura.io/cfNRuFKJMNeWhBsn2U4U"
+      rpcUrl: process.env.ETH_PROVIDER
     })
     this.web3 = new Web3(this.web3Provider)
     // truffle contract instance
