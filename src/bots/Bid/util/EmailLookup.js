@@ -9,6 +9,7 @@ class EmailLookup {
   constructor() {
     this.addressMap = {}
     this.jwtClient
+    this.expirationDate
 
     this._credentialsPath = path.join(__dirname, '../../../../', 'google_key.json')
   }
@@ -31,32 +32,32 @@ class EmailLookup {
    * Import KYC registrants
    */
   importKYC = async () => {
+    // we don't have a token
     if (!this.authToken)
       await this._authenticateGoogleToken()
 
-    try {
-      const sheets = google.sheets({version: 'v4', auth: this.jwtClient})
+    // token is expired
+    if (this.expirationDate <= (new Date()).getTime())
+      await this._authenticateGoogleToken()
 
-      const data = await new Promise((resolve, reject) => {
-        sheets.spreadsheets.values.get({
-          spreadsheetId: process.env.GOOGLE_SHEET_ID,
-          range: 'KYC Registration',
-        }, (err, result) => {
-          if (err)
-            reject(err)
-          resolve(result.data)
-        })
+    const sheets = google.sheets({version: 'v4', auth: this.jwtClient})
+
+    const data = await new Promise((resolve, reject) => {
+      sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: 'KYC Registration',
+      }, (err, result) => {
+        if (err)
+          reject(err)
+        resolve(result.data)
       })
+    })
 
-      return Promise.all(data.values.map(row => {
-        const ethAddress = row[20]
-        const emailAddress = row[4]
-        this.addressMap[ethAddress] = emailAddress
-      }))
-    } catch (err) {
-      console.error(err)
-      // re-auth token here?
-    }
+    return Promise.all(data.values.map(row => {
+      const ethAddress = row[20]
+      const emailAddress = row[4]
+      this.addressMap[ethAddress] = emailAddress
+    }))
   }
 
   /**
@@ -72,6 +73,7 @@ class EmailLookup {
     // authenticate request
     await jwtClient.authorize()
     this.jwtClient = jwtClient
+    this.expirationDate = new Date(jwtClient.credentials.expiry_date)
   }
 }
 

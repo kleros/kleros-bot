@@ -97,39 +97,53 @@ class BidBot {
       )
     // check for new bid events
     if (nextBlock <= lastBlock) {
+      // FIXME BidSubmitted is returning an empty list every time so we are using allEvents
       const bidEvent = this.contractInstance.allEvents({fromBlock: nextBlock, toBlock: lastBlock})
-      bidEvent.get(async (err, results) => {
-        if (err)
-          throw new Error(err)
+      // make sure all messages are sent before we update the blocks
+      await new Promise((resolve, reject) => {
+        bidEvent.get(async (err, results) => {
+          if (err)
+            reject(err)
 
-        for (let i=0; i<results.length; i++) {
-          const result = results[i]
+          try {
+            // process in block order
+            for (let i=0; i<results.length; i++) {
+              const result = results[i]
 
-          if (result.event === 'BidSubmitted') {
-            const contributor = result.args.contributor
-            const bidId = result.args.bidID.toNumber()
-            const time = result.args.time.toNumber()
+              if (result.event === 'BidSubmitted') {
+                const contributor = result.args.contributor
+                const bidId = result.args.bidID.toNumber()
+                const time = result.args.time.toNumber()
 
-            // check to make sure we haven't already notified user of bid
-            let contributorData = await this.db.findOne({'address': contributor})
-            if (!contributorData) {
-              contributorData = {
-                'address': contributor,
-                'seenBids': {}
+                // check to make sure we haven't already notified user of bid
+                let contributorData = await this.db.findOne({'address': contributor})
+                if (!contributorData) {
+                  // only need to look up email if it is their first bid
+                  const emailAddress = await this.emailLookup.fetchEmail(contributor)
+                  contributorData = {
+                    'address': contributor,
+                    'email': emailAddress,
+                    'seenBids': {}
+                  }
+                  await this.db.insertOne(contributorData)
+                }
+                if (!contributorData.seenBids[bidId]) {
+                  // send confirm email
+                  await this.sendConfirmationEmail(contributor, bidId, time, contributorData.email)
+                  // update mongo
+                  if (!contributorData.seenBids) contributorData.seenBids = {}
+                  contributorData.seenBids[bidId] = true
+                  await this.db.findOneAndUpdate({'address': contributor}, contributorData)
+
+                }
               }
-              await this.db.insertOne(contributorData)
             }
-            if (!contributorData.seenBids[bidId]) {
-              // send confirm email
-              await this.sendConfirmationEmail(contributor, bidId, time)
-              // update mongo
-              if (!contributorData.seenBids) contributorData.seenBids = {}
-              contributorData.seenBids[bidId] = true
-              await this.db.findOneAndUpdate({'address': contributor}, contributorData)
-
-            }
+          } catch (err) {
+            reject(err)
           }
-        }
+
+          resolve()
+        })
       })
 
       await this.db.findOneAndUpdate({'address': '0x0'}, {'address': '0x0', 'lastBlock': lastBlock})
@@ -137,8 +151,7 @@ class BidBot {
     }
   }
 
-  sendConfirmationEmail = async (ethAddress, bidId, time) => {
-    const emailAddress = await this.emailLookup.fetchEmail(ethAddress)
+  sendConfirmationEmail = async (ethAddress, bidId, time, emailAddress) => {
     const bidData = await this.contractInstance.bids(bidId)
     let personalCap = (await this.web3.fromWei(bidData[2], 'ether')).toNumber()
     if (personalCap === bidConstants.INFINITY)
