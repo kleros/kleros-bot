@@ -129,7 +129,8 @@ class BidBot {
                 }
                 if (!contributorData.seenBids[bidId]) {
                   // send confirm email
-                  await this.sendConfirmationEmail(contributor, bidId, time, contributorData.email)
+                  if (contributorData.email)
+                    await this.sendConfirmationEmail(contributor, bidId, time, contributorData.email)
                   // update mongo
                   if (!contributorData.seenBids) contributorData.seenBids = {}
                   contributorData.seenBids[bidId] = true

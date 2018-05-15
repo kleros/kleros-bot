@@ -18,12 +18,8 @@ class EmailLookup {
    * Get the email address cooresponding to the eth address of a kyc registered user
    */
   fetchEmail = async ethAddress => {
-    if (!this.addressMap[ethAddress]) {
+    if (!this.addressMap[ethAddress])
       await this.importKYC()
-
-      if (!this.addressMap[ethAddress])
-        throw new Error(`ETH address not registered in KYC: ${ethAddress}`)
-    }
 
     return this.addressMap[ethAddress]
   }
