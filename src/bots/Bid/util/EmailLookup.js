@@ -39,7 +39,7 @@ class EmailLookup {
 
       const data = await new Promise((resolve, reject) => {
         sheets.spreadsheets.values.get({
-          spreadsheetId: bidConstants.GOOGLE_SHEET_ID,
+          spreadsheetId: process.env.GOOGLE_SHEET_ID,
           range: 'KYC Registration',
         }, (err, result) => {
           if (err)
@@ -51,13 +51,11 @@ class EmailLookup {
       return Promise.all(data.values.map(row => {
         const ethAddress = row[20]
         const emailAddress = row[4]
-        // console.log(`${ethAddress} -> ${emailAddress}`)
         this.addressMap[ethAddress] = emailAddress
       }))
     } catch (err) {
       console.error(err)
-      // re-auth token
-      this.authToken = await this._authenticateGoogleToken()
+      // re-auth token here?
     }
   }
 

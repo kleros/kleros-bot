@@ -8,14 +8,14 @@ dotenv.config()
 
 let Bot
 const args = require('minimist')(process.argv.slice(2))
-let botType = args.bot_type
+let botType = args.type
 
 if (!botType) {
   console.log('Missing parameter bot_type')
   console.log('Usage: node ./index.js --bot_type=<bot type>')
-  console.log('bot types can be one of: KlerosPOC')
+  console.log('bot types can be one of: KlerosPOC, BidBot')
   // FIXME bable-watch isn't playing well with yargs
-  console.log('Defaulting to KlerosPOC')
+  console.log('Defaulting to BidBot')
   botType = 'BidBot'
 }
 
@@ -34,7 +34,7 @@ switch (botType) {
     Bot = new KlerosPOCBot(arbitratorAddress)
     break
   case 'BidBot':
-    const iicoAddress = '0xa7763af85440446a4d1a93ef512a0feeec61b8e7'
+    const iicoAddress = process.env.IICO_CONTRACT_ADDRESS
     Bot = new BidBot(iicoAddress)
     break
   default:

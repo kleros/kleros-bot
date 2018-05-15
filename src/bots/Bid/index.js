@@ -3,6 +3,7 @@ import Web3 from 'web3'
 import MongoClient from 'mongodb'
 import contract from 'truffle-contract'
 import ZeroClientProvider from 'web3-provider-engine/zero'
+import sgMail from '@sendgrid/mail'
 
 import iicoArtifact from '../../constants/IICO'
 import * as bidConstants from '../../constants/bid'
@@ -19,7 +20,6 @@ class BidBot {
     this.cycleStop = false
     this.timer
     // web3
-
     this.web3Provider = ZeroClientProvider({
       rpcUrl: "https://kovan.infura.io/cfNRuFKJMNeWhBsn2U4U"
     })
@@ -31,8 +31,11 @@ class BidBot {
     this.db
     // last block checked
     this.lastBlock = 0
-    // email lookup
+    // email
     this.emailLookup = new EmailLookup()
+    // setup sendgrid
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    sgMail.setSubstitutionWrappers('{{', '}}')
   }
 
   _init = async () => {
@@ -80,7 +83,7 @@ class BidBot {
       await this.checkForEvents()
 
       if (!this.cycle_stop) this.fetchBidsCycle()
-    }, 15 * 1000) // every 30 seconds check to make sure we should still be running
+    }, 15 * 1000) // every 15 seconds check for new events
   }
 
   checkForEvents = async () => {
@@ -92,7 +95,6 @@ class BidBot {
           resolve(result)
         })
       )
-    console.log(`${lastBlock - nextBlock} blocks have passed since we last checked`)
     // check for new bid events
     if (nextBlock <= lastBlock) {
       const bidEvent = this.contractInstance.allEvents({fromBlock: nextBlock, toBlock: lastBlock})
@@ -137,15 +139,32 @@ class BidBot {
 
   sendConfirmationEmail = async (ethAddress, bidId, time) => {
     const emailAddress = await this.emailLookup.fetchEmail(ethAddress)
-    const bidData = this.contractInstance.bids(bidId)
-    const contribution = (await this.web3.fromWei(bidData.contrib, 'ether'))
-    const personalCap = (await this.web3.fromWei(bidData.maxValuation, 'ether'))
+    const bidData = await this.contractInstance.bids(bidId)
+    let personalCap = (await this.web3.fromWei(bidData[2], 'ether')).toNumber()
+    if (personalCap === bidConstants.INFINITY)
+      personalCap = "No Cap"
+    else
+      personalCap = `${personalCap} ETH`
+    const contribution = (await this.web3.fromWei(bidData[3], 'ether')).toNumber()
 
-    console.log(`FAKE EMAIL TO: ${emailAddress}`)
-    console.log('Bid Details:')
-    console.log(`Placed on: ${time}`)
-    console.log(`Contribution: ${contribution} ETH`)
-    console.log(`Personal cap: ${personalCap} ETH`)
+    // format time string
+    const bidTime = new Date(time * 1000)
+    const bidTimeString = `${bidTime.getUTCDate()}/${bidTime.getUTCMonth() + 1}/${bidTime.getUTCFullYear()}`
+
+    const msg = {
+      to: emailAddress,
+      from: 'contact@kleros.io',
+      subject: 'Your Bid Has Been Received',
+      templateId: process.env.SENDGRID_TEMPLATE_ID,
+      substitutions: {
+        bidTime: bidTimeString,
+        contribution: contribution,
+        personalCap: personalCap
+      },
+    }
+
+    sgMail.send(msg)
+    console.log(`Sent confirmation to: ${emailAddress}`)
   }
 
   /**
