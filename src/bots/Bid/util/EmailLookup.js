@@ -17,7 +17,7 @@ class EmailLookup {
   /**
    * Get the email address cooresponding to the eth address of a kyc registered user
    */
-  fetchEmail = async ethAddress => {
+  fetchData = async ethAddress => {
     if (!this.addressMap[ethAddress])
       await this.importKYC()
 
@@ -52,7 +52,8 @@ class EmailLookup {
     return Promise.all(data.values.map(row => {
       const ethAddress = (row[20] ? row[20].toLowerCase() : null)
       const emailAddress = row[4]
-      this.addressMap[ethAddress] = emailAddress
+      const name = row[1]
+      this.addressMap[ethAddress] = { emailAddress, name }
     }))
   }
 

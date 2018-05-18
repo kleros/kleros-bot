@@ -111,26 +111,38 @@ class BidBot {
               const result = results[i]
 
               if (result.event === 'BidSubmitted') {
-                const contributor = (result.args.contributor).toLowerCase()
-                const bidId = result.args.bidID.toNumber()
-                const time = result.args.time.toNumber()
+                const contributor = result.args.contributor
+                const bidId = (result.args.bidID).toNumber()
+                const txHash = result.transactionHash
 
                 // check to make sure we haven't already notified user of bid
                 let contributorData = await this.db.findOne({'address': contributor})
                 if (!contributorData) {
                   // only need to look up email if it is their first bid
-                  const emailAddress = await this.emailLookup.fetchEmail(contributor)
+                  const kycData = (await this.emailLookup.fetchData(contributor)) || {}
                   contributorData = {
                     'address': contributor,
-                    'email': emailAddress,
+                    'email': kycData.emailAddress,
+                    'name': kycData.name,
                     'seenBids': {}
                   }
                   await this.db.insertOne(contributorData)
+                } else {
+                  // update old entries that were put in db without a name
+                  if (!contributorData.name) {
+                    const kycData = (await this.emailLookup.fetchData(contributor)) || {}
+                    contributorData.name = kycData.name
+                  }
                 }
                 if (!contributorData.seenBids[bidId]) {
                   // send confirm email
                   if (contributorData.email)
-                    await this.sendConfirmationEmail(contributor, bidId, time, contributorData.email)
+                    await this.sendConfirmationEmail(
+                      contributor,
+                      txHash,
+                      contributorData.name,
+                      contributorData.email
+                    )
                   // update mongo
                   if (!contributorData.seenBids) contributorData.seenBids = {}
                   contributorData.seenBids[bidId] = true
@@ -152,18 +164,7 @@ class BidBot {
     }
   }
 
-  sendConfirmationEmail = async (ethAddress, bidId, time, emailAddress) => {
-    const bidData = await this.contractInstance.bids(bidId)
-    let personalCap = (await this.web3.fromWei(bidData[2], 'ether')).toNumber()
-    if (personalCap === bidConstants.INFINITY)
-      personalCap = "No Cap"
-    else
-      personalCap = `${personalCap} ETH`
-    const contribution = (await this.web3.fromWei(bidData[3], 'ether')).toNumber()
-
-    // format time string
-    const bidTime = new Date(time * 1000)
-    const bidTimeString = `${bidTime.getUTCDate()}/${bidTime.getUTCMonth() + 1}/${bidTime.getUTCFullYear()}`
+  sendConfirmationEmail = async (ethAddress, txHash, name, emailAddress) => {
 
     const msg = {
       to: emailAddress,
@@ -171,14 +172,13 @@ class BidBot {
       subject: 'Your Bid Has Been Received',
       templateId: process.env.SENDGRID_TEMPLATE_ID,
       substitutions: {
-        bidTime: bidTimeString,
-        contribution: contribution,
-        personalCap: personalCap
+        name,
+        txHash
       },
     }
 
     sgMail.send(msg)
-    console.log(`Sent confirmation to: ${emailAddress}`)
+    console.log(`Sent confirmation to: ${emailAddress} - Name: ${name}, TxHash: ${txHash}. -- ${ethAddress}`)
   }
 
   /**
