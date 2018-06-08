@@ -169,7 +169,7 @@ class BidBot {
     const msg = {
       to: emailAddress,
       from: 'contact@kleros.io',
-      subject: 'Your Bid Has Been Received',
+      subject: 'Kleros - Your Bid Has Been Received',
       templateId: process.env.SENDGRID_TEMPLATE_ID,
       substitutions: {
         name,
