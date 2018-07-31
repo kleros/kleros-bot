@@ -1,12 +1,11 @@
-import TransactionController from '../../../TransactionController'
-import { isCallValid } from '../../../helpers'
+import { isCallValid } from '../../helpers'
 import Web3Abi from 'web3-eth-abi'
 
 /** Implements methods to call klerosPOC methods pass period, repartition tokens and execute ruling
 */
-class KlerosPOCTxController extends TransactionController {
-  constructor(privateKey, provider) {
-    super(privateKey, provider)
+class KlerosPOCTxController {
+  constructor(transactionController) {
+    this.transactionController = transactionController
   }
 
   async passPeriod (arbitratorAddress) {
@@ -18,7 +17,11 @@ class KlerosPOCTxController extends TransactionController {
 
     const isValid = await isCallValid(arbitratorAddress, bytecodeData)
     if (isValid) {
-      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+      const txHash = await this.transactionController._sendTransactionWithBackoff(
+        arbitratorAddress,
+        this.address,
+        bytecodeData
+      )
       console.log("passPeriod: " + txHash)
       return txHash
     }
@@ -38,7 +41,11 @@ class KlerosPOCTxController extends TransactionController {
     const isValid = await isCallValid(arbitratorAddress, bytecodeData)
 
     if (isValid) {
-      const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+      const txHash = await this.transactionController._sendTransactionWithBackoff(
+        arbitratorAddress,
+        this.address,
+        bytecodeData
+      )
       console.log(`repartitioning dispute ${disputeId}:  ${txHash}`)
       return txHash
     }
@@ -55,7 +62,11 @@ class KlerosPOCTxController extends TransactionController {
     }, [disputeId])
 
     // FIXME: We don't want to check if call is valid because this is called directly after repartition so call will not be valid at time of submission
-    const txHash = await this._sendTransactionWithBackoff(arbitratorAddress, this.address, bytecodeData)
+    const txHash = await this.transactionController._sendTransactionWithBackoff(
+      arbitratorAddress,
+      this.address,
+      bytecodeData
+    )
     console.log(`executing dispute ${disputeId}:  ${txHash}`)
     return txHash
   }

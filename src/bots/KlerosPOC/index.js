@@ -3,26 +3,29 @@ import { Kleros } from 'kleros-api'
 import {
   PERIODS
 } from '../../constants/arbitrator'
-import TransactionController from './transactions/Controller'
+import KlerosPOCTxController from './KlerosPOCTxController'
 import { transactionListener } from '../../helpers'
 import { processDisputes } from './disputes/actOnOpenDisputes'
 
 /** This Bot watches a KlerosPOC contract, passes periods, redistributes tokens and executes rulings
 */
 class KlerosPOCBot {
-  constructor(arbitratorAddress) {
+  constructor(arbitratorAddress, transactionController) {
     // set env with contract address
     process.env.ARBITRATOR_CONTRACT_ADDRESS = arbitratorAddress
     // timing params
     this.cycleStop = false
     this.timer
     // kleros params
-    this.transactionController
     this.currentPeriod
     this.botAddress
     this.periodIntervals
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
-    // don't care about store
+    this.transactionController = new KlerosPOCTxController(
+      process.env.PRIVATE_KEY,
+      process.env.ETH_PROVIDER,
+      transactionController
+    )
     const KlerosInstance = new Kleros(web3Provider)
     const web3 = new Web3(web3Provider)
     this.KlerosPOC = KlerosInstance.klerosPOC
@@ -39,7 +42,6 @@ class KlerosPOCBot {
     console.log("TIME PER PERIOD: " + this.periodIntervals)
     this.currentPeriod = await this.KlerosPOC.getPeriod(process.env.ARBITRATOR_CONTRACT_ADDRESS)
 
-    this.transactionController = new TransactionController(process.env.PRIVATE_KEY)
     this.botAddress = this.transactionController.address
     console.log("bot address: " + this.botAddress)
     process.env.ADDRESS = this.botAddress

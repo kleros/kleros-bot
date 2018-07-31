@@ -16,6 +16,7 @@ class TransactionController {
     this._privateKey = Buffer.from(privateKey, 'hex')
     // generate address
     this.address = privateToAddress(this._privateKey).toString('hex')
+    console.log(this.address)
     // web3
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     this.web3 = new Web3(web3Provider)
@@ -31,7 +32,7 @@ class TransactionController {
   }
 
   _sendTransaction = async rawTransaction => {
-    const txHash = await this.web3.eth.sendRawTransaction('0x' + rawTransaction.toString('hex'))
+    const txHash = (await this.web3.eth.sendSignedTransaction('0x' + rawTransaction.toString('hex'))).transactionHash
 
     return txHash
   }
@@ -39,10 +40,10 @@ class TransactionController {
   /** Get nonce from blockchain if we don't have a counter in memory
   * NOTE we are assuming that each bot will be using a different pub key so nonce will not be effected by external tx's
   */
-  _getNonce = () => {
+  _getNonce = async () => {
     if (!this.nonce) {
       // if nonce isn't set get from blockchain
-      this.nonce = this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
+      this.nonce = await this.web3.eth.getTransactionCount('0x' + this.address, 'pending')
     }
     const currentNonce = this.nonce
     this.nonce++
@@ -50,15 +51,15 @@ class TransactionController {
     return currentNonce
   }
 
-  _getTxParams = (
+  _getTxParams = async (
     to,
     from,
     data
   ) => {
-    const gasPrice = this.web3.eth.gasPrice
-    const gasPriceHex = this.web3.toHex(gasPrice)
-    const gasLimitHex = this.web3.toHex(GAS_LIMIT)
-    const nonce = this._getNonce()
+    const gasPrice = await this.web3.eth.getGasPrice()
+    const gasPriceHex = this.web3.utils.toHex(gasPrice)
+    const gasLimitHex = this.web3.utils.toHex(GAS_LIMIT)
+    const nonce = await this._getNonce()
 
     return {
       nonce: nonce,
@@ -73,13 +74,13 @@ class TransactionController {
   _sendTransactionWithBackoff = async (to, from, data) => {
     let txHash
 
-    let txParams = this._getTxParams(to, from, data)
+    let txParams = await this._getTxParams(to, from, data)
     let tx = this._createSignedRawTransaction(txParams)
     try {
       txHash = await this._sendTransaction(tx)
     } catch (e) {
       // retry once. Usually a nonce issue TODO make this better
-      txParams = this._getTxParams(to, from, data)
+      txParams = await this._getTxParams(to, from, data)
       tx = this._createSignedRawTransaction(txParams)
       txHash = await this._sendTransaction(tx)
     }
