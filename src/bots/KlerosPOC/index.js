@@ -12,6 +12,7 @@ import { processDisputes } from './disputes/actOnOpenDisputes'
 class KlerosPOCBot {
   constructor(arbitratorAddress) {
     // set env with contract address
+    this.contractAddress = arbitratorAddress
     process.env.ARBITRATOR_CONTRACT_ADDRESS = arbitratorAddress
     // timing params
     this.cycleStop = false
@@ -65,14 +66,18 @@ class KlerosPOCBot {
       // this starts child processes to handle dispute actions
       await processDisputes(process.env.ARBITRATOR_CONTRACT_ADDRESS, this.transactionController, this.KlerosPOC)
     }
-    await this._passPeriod()
+    const lastPeriodChange = (await this.KlerosPOC.getData(this.contractAddress)).lastPeriodChange
+    // get the time until the next period
+    let timeUntilNextPeriod = parseInt(this.periodIntervals[this.currentPeriod] - ((new Date() / 1000) - lastPeriodChange))
+    if (timeUntilNextPeriod < 0) timeUntilNextPeriod = 0
+    console.log(timeUntilNextPeriod)
 
     // FIXME use passPeriod event to trigger timer once events are supported
     this.timer = setTimeout(async () => {
       await this._passPeriod()
       // start another cycle
       if (!this.cycle_stop) this.passPeriodCycle()
-    }, this.periodIntervals[this.currentPeriod] * 1000)
+    }, timeUntilNextPeriod * 1000)
   }
 
   _passPeriod  = async () => {
