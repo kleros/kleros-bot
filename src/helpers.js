@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 import Web3Abi from 'web3-eth-abi'
-import { CALL_VALIDATOR } from '../constants'
+import { CALL_VALIDATOR } from './constants/arbitrator'
 
 /** Crude method for seeing when tx's have been mined. INFURA does not support event watching
 * and as far as I can tell MetaMasks ZeroClientProvider only works client side FIXME

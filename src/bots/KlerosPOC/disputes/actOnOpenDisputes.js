@@ -3,7 +3,7 @@ import { Kleros } from 'kleros-api'
 import {
   DISPUTE_STATES,
   NULL_ADDRESS
-} from '../../../../constants'
+} from '../../../constants/arbitrator'
 import childProcess from 'child_process'
 
 /** FIXME memoize disputeId's that have been acted on so that we can more efficiently rip through the array
