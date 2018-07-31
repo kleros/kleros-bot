@@ -169,8 +169,8 @@ class DogeBot {
               switch (Number(event.args.status)) {
                 case dogeConstants.IN_CONTRACT_STATUS_ENUM.Submitted:
                   if (event.args.disputed === true) {
-                    submitterMessage = 'Your image has been challenged. Sit tight and wait for dispute resolution.'
-                    challengerMessage = 'You have challenged an image. Sit tight and wait for dispute resolution.'
+                    submitterMessage = 'Your image has been challenged. Sit tight and wait for the jury to make a decision.'
+                    challengerMessage = 'You have challenged an image. Sit tight and wait for the jury to make a decision.'
                     // cancel pending timeout
                     clearTimeout(this.executeTimeouts[item])
                     // execute will be handled in dispute resolution
@@ -192,8 +192,8 @@ class DogeBot {
                   break
                 case dogeConstants.IN_CONTRACT_STATUS_ENUM.Cleared:
                   if (event.args.disputed === false) {
-                    submitterMessage = 'Your image been rejected from the list. You have lost your deposit.'
-                    challengerMessage = 'The image you challenged has been rejected from the list. Your deposit has been returned.'
+                    submitterMessage = 'The image you submitted has been rejected from the list. You have lost your deposit.'
+                    challengerMessage = 'The image you challenged has been rejected from the list. Your deposit has been returned. You have also collected the deposit of the Submitter’.'
                     await this._updateMongo(item, {'status': 'none'})
                   }
                   break
