@@ -4,6 +4,7 @@ import { privateToAddress } from 'ethereumjs-util'
 import {
   GAS_LIMIT
 } from './constants/arbitrator'
+import { PromiseQueue } from './helpers'
 
 class TransactionController {
   /**
@@ -16,10 +17,10 @@ class TransactionController {
     this._privateKey = Buffer.from(privateKey, 'hex')
     // generate address
     this.address = privateToAddress(this._privateKey).toString('hex')
-    console.log(this.address)
     // web3
     const web3Provider = new Web3.providers.HttpProvider(process.env.ETH_PROVIDER)
     this.web3 = new Web3(web3Provider)
+    this.getNoncePromiseQueue = new PromiseQueue()
     // local nonce counter
     this.nonce
   }
@@ -33,7 +34,6 @@ class TransactionController {
 
   _sendTransaction = async rawTransaction => {
     const txHash = (await this.web3.eth.sendSignedTransaction('0x' + rawTransaction.toString('hex'))).transactionHash
-
     return txHash
   }
 
@@ -59,7 +59,7 @@ class TransactionController {
     const gasPrice = await this.web3.eth.getGasPrice()
     const gasPriceHex = this.web3.utils.toHex(gasPrice)
     const gasLimitHex = this.web3.utils.toHex(GAS_LIMIT)
-    const nonce = await this._getNonce()
+    const nonce = await this.getNoncePromiseQueue.fetch(this._getNonce)
 
     return {
       nonce: nonce,
@@ -84,7 +84,6 @@ class TransactionController {
       tx = this._createSignedRawTransaction(txParams)
       txHash = await this._sendTransaction(tx)
     }
-
     return txHash
   }
 

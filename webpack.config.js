@@ -6,7 +6,7 @@ const env = require('yargs').argv.env; // use --env with webpack 2
 
 let libraryName = 'kleros-bot';
 
-let plugins = [], outputFile;
+let plugins = [new webpack.IgnorePlugin(/^electron$/)], outputFile;
 
 if (env === 'build') {
   outputFile = libraryName + '.js';

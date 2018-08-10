@@ -25,7 +25,6 @@ class DogeTxController {
         this.transactionController.address,
         bytecodeData,
       )
-      console.log(txHash)
       console.log("DOGE - executeRequest: " + txHash)
       return txHash
     }

@@ -11,5 +11,5 @@ exports.DISPUTE_STATES = {
   EXECUTABLE: 2,
   EXECUTED: 3
 }
-exports.GAS_LIMIT = 440000
+exports.GAS_LIMIT = 150000
 exports.NULL_ADDRESS = '0x'

@@ -75,8 +75,8 @@ class DogeBot {
 
     // get pending doges and start timeouts
     const pendingDoges = await this.db.find({'status': 'pending'})
-    pendingDoges.forEach(doge => {
-      this.setDogeExecuteTimeout(doge.item)
+    pendingDoges.forEach(async doge => {
+      await this.setDogeExecuteTimeout(doge.item)
     })
   }
 
@@ -114,7 +114,7 @@ class DogeBot {
 
       let timeBeforeExecute = (this.timeToChallenge - (new Date() - lastAction))
       if (timeBeforeExecute < 0) timeBeforeExecute = 0
-      this.executeTimeouts[itemHash] = this.executePendingDogeTimeout(itemHash, timeBeforeExecute)
+      this.executeTimeouts[itemHash] = await this.executePendingDogeTimeout(itemHash, timeBeforeExecute)
     }
   }
 
@@ -268,9 +268,8 @@ class DogeBot {
         item
       },
     }
-    console.log(msg)
     sgMail.send(msg)
-    // console.log(`Sent confirmation to: ${emailAddress} - Name: ${name}, TxHash: ${txHash}. -- ${ethAddress}`)
+    console.log(`Sent confirmation to: ${emailAddress} - Item ${item}`)
   }
 
   /**
