@@ -208,7 +208,7 @@ class DogeBot {
               }
 
               // send emails
-              if (challenger) {
+              if (challenger && challengerMessage) {
                 const challengerEmail = await this._fetchEmailAddressAWS(challenger)
                 if (challengerEmail) this.sendUpdateEmail(challengerEmail, challengerMessage, item)
               }
